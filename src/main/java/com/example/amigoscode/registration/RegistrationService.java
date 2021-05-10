@@ -3,6 +3,7 @@ package com.example.amigoscode.registration;
 import com.example.amigoscode.appuser.AppUser;
 import com.example.amigoscode.appuser.AppUserRole;
 import com.example.amigoscode.appuser.AppUserService;
+import com.example.amigoscode.email.EmailSender;
 import com.example.amigoscode.email.EmailValidator;
 import com.example.amigoscode.registration.token.ConfirmationToken;
 import com.example.amigoscode.registration.token.ConfirmationTokenService;
@@ -18,6 +19,7 @@ public class RegistrationService {
     private final AppUserService appUserService;
     private final EmailValidator emailValidator;
     private final ConfirmationTokenService confirmationTokenService;
+    private final EmailSender emailSender;
 
 
     public String register(RegistrationRequest request) {
@@ -25,7 +27,7 @@ public class RegistrationService {
         if (!isValidEmail) {
             throw new IllegalStateException("email not valid");
         }
-        return appUserService.singUpUser(
+        String token = appUserService.singUpUser(
                 new AppUser(
                         request.getFirstName(),
                         request.getLastName(),
@@ -34,6 +36,9 @@ public class RegistrationService {
                         AppUserRole.USER
                 )
         );
+        String link = "http://localhost:8080/api/v1/registration/confirm?token=" +token;
+        emailSender.send(request.getEmail(),buildEmail(request.getFirstName(),link));
+        return token;
     }
 
     @Transactional
