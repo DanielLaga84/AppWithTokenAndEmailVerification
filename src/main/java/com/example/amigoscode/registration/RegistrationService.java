@@ -36,6 +36,8 @@ public class RegistrationService {
                         AppUserRole.USER
                 )
         );
+
+        //very important part of email!
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" +token;
         emailSender.send(request.getEmail(),buildEmail(request.getFirstName(),link));
         return token;
@@ -54,7 +56,7 @@ public class RegistrationService {
 
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();
 
-        if (expiredAt.isBefore(LocalDateTime.now())) {
+        if (expiredAt.isAfter(LocalDateTime.now())) {
             throw new IllegalStateException("token expired");
         }
 
